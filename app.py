@@ -15,9 +15,7 @@ Dive into how a simple 2-layer neural network learns to classify non-linearly se
 - 🔍 Choose different datasets (moons, circles, blobs, and more)
 - 🎛️ Tune hyperparameters like hidden units and learning rate
 
-Perfect for beginners trying to demystify backpropagation and decision boundaries.
-
-""")
+Perfect for beginners trying to demystify backpropagation and decision boundaries.""")
 
 # 1. Dataset choice
 st.sidebar.header("Dataset Settings")
@@ -26,8 +24,8 @@ dataset_choice = st.sidebar.selectbox("Select a dataset",
 
 # 2. Model hyperparameters
 st.sidebar.header("Model Hyperparameters")
-hidden_units = st.sidebar.slider("Hidden Layer Units", 1, 128, 64)
-learning_rate = st.sidebar.slider("Learning Rate", 0.01, 5.0, 0.1, step=0.01)
+hidden_units = st.sidebar.slider("Hidden Layer Units", 1, 128, 70)
+learning_rate = st.sidebar.slider("Learning Rate", 0.01, 5.0, 1.2, step=0.01)
 iterations = st.sidebar.slider("Training Iterations", 500, 10000, 5000, step=500)
 
 # Load data
