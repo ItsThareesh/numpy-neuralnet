@@ -10,12 +10,12 @@ def plot_decision_boundary(model, X, y):
 
     Parameters
     -----------
-    model : function
-        A function that takes a 2D numpy array of shape (n_samples, 2) and returns predicted labels.
-    X : numpy.ndarray
-        Input features of shape (2, n_samples). Each column represents a data point in 2D.
-    y : numpy.ndarray
-        True labels corresponding to X, shape (n_samples,) or (1, n_samples).
+    model : `function`
+        A function that takes a 2D numpy array of shape `(n_samples, 2)` and returns predicted labels.
+    X : `numpy.ndarray`
+        Input features of shape `(2, n_samples)`. Each column represents a data point in 2D.
+    y : `numpy.ndarray`
+        True labels corresponding to X, shape `(1, n_samples)`.
 
     Returns
     --------
@@ -80,8 +80,8 @@ def load_planar_dataset():
 
     Returns
     -------
-    X : np.ndarray
-    Y : np.ndarray
+    X : `np.ndarray`
+    Y : `np.ndarray`
     """
 
     np.random.seed(1)
@@ -109,6 +109,10 @@ def load_planar_dataset():
 def load_extra_datasets():
     """
     Generates and returns a collection of synthetic 2D datasets for classification.
+
+    Returns
+    -------
+    datasets : `dict`    
     """
 
     np.random.seed(1)
