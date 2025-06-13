@@ -5,7 +5,7 @@ from planar_utils import sigmoid, tanh_derivative
 np.random.seed(1)
 
 
-def layer_sizes(X, Y, hidden_units=32):
+def layer_sizes(X, Y, hidden_units_1=32, hidden_units_2=32):
     """
     Computes the sizes of the layers in a 2-layer neural network.
 
@@ -30,13 +30,14 @@ def layer_sizes(X, Y, hidden_units=32):
     """
 
     n_x = X.shape[0]
-    n_h = hidden_units
+    n_h_1 = hidden_units_1
+    n_h_2 = hidden_units_2
     n_y = Y.shape[0]
 
-    return (n_x, n_h, n_y)
+    return (n_x, n_h_1, n_h_2, n_y)
 
 
-def initialize_parameters(n_x, n_h, n_y):
+def initialize_parameters(n_x, n_h_1, n_h_2, n_y):
     """
     Initializes the parameters of a 2-layer neural network.
 
@@ -64,12 +65,14 @@ def initialize_parameters(n_x, n_h, n_y):
 
     scale_factor = 0.01
 
-    W1 = np.random.randn(n_x, n_h) * scale_factor
-    b1 = np.zeros((n_h, 1))
-    W2 = np.random.randn(n_h, n_y) * scale_factor
-    b2 = np.zeros((n_y, 1))
-
-    parameters = {"W1": W1, "b1": b1, "W2": W2, "b2": b2}
+    parameters = {
+        "W1": np.random.randn(n_x, n_h_1) * scale_factor,
+        "b1": np.zeros((n_h_1, 1)),
+        "W2": np.random.randn(n_h_1, n_h_2) * scale_factor,
+        "b2": np.zeros((n_h_2, 1)),
+        "W3": np.random.randn(n_h_2, n_y) * scale_factor,
+        "b3": np.zeros((n_y, 1))
+    }
 
     return parameters
 
@@ -208,14 +211,14 @@ def backward_propagation(parameters: dict, cache: dict, X: np.ndarray, Y: np.nda
     return grads
 
 
-def compute_cost(A2: np.ndarray, Y: np.ndarray) -> float:
+def compute_cost(A3: np.ndarray, Y: np.ndarray) -> float:
     """
     Computes the cost for the 2-layer neural network.
 
     Parameters
     ----------
-    A2 : `np.ndarray`
-        Activation from second layer (sigmoid).
+    A3 : `np.ndarray`
+        Activation from third layer (sigmoid).
     Y : `np.ndarray`
         Input data containing true labels of shape `(n_y, m)`, where n_y is the number of output units and m is the number of examples.
 
@@ -228,7 +231,7 @@ def compute_cost(A2: np.ndarray, Y: np.ndarray) -> float:
     m = Y.shape[1]
     epsilon = 1e-15
 
-    cost = -(np.sum(((Y * np.log(A2 + epsilon)) + (1 - Y) * np.log(1 - A2 + epsilon)))) / m
+    cost = -(np.sum(((Y * np.log(A3 + epsilon)) + (1 - Y) * np.log(1 - A3 + epsilon)))) / m
     cost = np.squeeze(cost)
 
     return cost
@@ -280,19 +283,18 @@ def update_parameters(parameters: dict, grads: dict, learning_rate: float) -> di
             Updated bias vector for the second layer
     """
 
-    W1 = parameters.get("W1")
-    b1 = parameters.get("b1")
-    W2 = parameters.get("W2")
-    b2 = parameters.get("b2")
+    updated_params = {}
 
-    W1 -= learning_rate * grads.get("dW1")
-    b1 -= learning_rate * grads.get("db1")
-    W2 -= learning_rate * grads.get("dW2")
-    b2 -= learning_rate * grads.get("db2")
+    for l in range(1, 4):  # for 3 layers
+        W_key = f"W{l}"
+        b_key = f"b{l}"
+        dW_key = f"dW{l}"
+        db_key = f"db{l}"
 
-    parameters = {"W1": W1, "b1": b1, "W2": W2, "b2": b2}
+        updated_params[W_key] = parameters[W_key] - learning_rate * grads[dW_key]
+        updated_params[b_key] = parameters[b_key] - learning_rate * grads[db_key]
 
-    return parameters
+    return updated_params
 
 
 def build_model(
