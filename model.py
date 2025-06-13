@@ -108,18 +108,24 @@ def forward_propagation(X: np.ndarray, parameters: dict) -> dict:
             Activation from second layer (sigmoid)
     """
 
-    W1 = parameters.get("W1")
-    b1 = parameters.get("b1")
-    W2 = parameters.get("W2")
-    b2 = parameters.get("b2")
+    W1, b1 = parameters["W1"], parameters["b1"]
+    W2, b2 = parameters["W2"], parameters["b2"]
+    W3, b3 = parameters["W3"], parameters["b3"]
 
     Z1 = np.dot(W1.T, X) + b1
     A1 = np.tanh(Z1)
 
     Z2 = np.dot(W2.T, A1) + b2
-    A2 = sigmoid(Z2)
+    A2 = np.tanh(Z2)
 
-    cache = {"Z1": Z1, "A1": A1, "Z2": Z2, "A2": A2}
+    Z3 = np.dot(W3.T, A2) + b3
+    A3 = sigmoid(Z3)
+
+    cache = {
+        "Z1": Z1, "A1": A1,
+        "Z2": Z2, "A2": A2,
+        "Z3": Z3, "A3": A3
+    }
 
     return cache
 
@@ -174,12 +180,18 @@ def backward_propagation(parameters: dict, cache: dict, X: np.ndarray, Y: np.nda
 
     m = X.shape[1]
 
-    W2 = parameters.get("W2")
+    W3 = parameters["W3"]
+    W2 = parameters["W2"]
 
     A1 = cache.get("A1")
     A2 = cache.get("A2")
+    A3 = cache.get("A3")
 
-    dZ2 = A2 - Y
+    dZ3 = A3 - Y
+    dW3 = np.dot(A2, dZ3.T) / m
+    db3 = np.sum(dZ3, axis=1, keepdims=True) / m
+
+    dZ2 = np.dot(W3, dZ3) * tanh_derivative(A2)
     dW2 = np.dot(A1, dZ2.T) / m
     db2 = np.sum(dZ2, axis=1, keepdims=True) / m
 
@@ -187,7 +199,11 @@ def backward_propagation(parameters: dict, cache: dict, X: np.ndarray, Y: np.nda
     dW1 = np.dot(X, dZ1.T) / m
     db1 = np.sum(dZ1, axis=1, keepdims=True) / m
 
-    grads = {"dW1": dW1, "db1": db1, "dW2": dW2, "db2": db2}
+    grads = {
+        "dW1": dW1, "db1": db1,
+        "dW2": dW2, "db2": db2,
+        "dW3": dW3, "db3": db3
+    }
 
     return grads
 
@@ -353,6 +369,7 @@ def predict(parameters: dict, X: np.ndarray) -> np.ndarray:
     A2 : `np.ndarray`
         Predicted labels of shape `(1, m)`, where m is the number of examples with 0s and 1s.
     """
+
     cache = forward_propagation(X, parameters)
     A2 = (cache["A2"] > 0.5).astype(int)
 
