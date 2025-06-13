@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 from planar_utils import sigmoid, tanh_derivative
 
 np.random.seed(1)
@@ -63,14 +62,12 @@ def initialize_parameters(n_x, n_h_1, n_h_2, n_y):
     # If you need to generate the same sequence of random numbers multiple times within a program, you'll need to set the seed again before each generation.
     np.random.seed(1)
 
-    scale_factor = 0.01
-
     parameters = {
-        "W1": np.random.randn(n_x, n_h_1) * scale_factor,
+        "W1": np.random.randn(n_x, n_h_1) * (np.sqrt(1. / n_h_1)),
         "b1": np.zeros((n_h_1, 1)),
-        "W2": np.random.randn(n_h_1, n_h_2) * scale_factor,
+        "W2": np.random.randn(n_h_1, n_h_2) * (np.sqrt(1. / n_h_2)),
         "b2": np.zeros((n_h_2, 1)),
-        "W3": np.random.randn(n_h_2, n_y) * scale_factor,
+        "W3": np.random.randn(n_h_2, n_y) * (np.sqrt(1. / n_y)),
         "b3": np.zeros((n_y, 1))
     }
 
@@ -340,8 +337,8 @@ def build_model(
         parameters = update_parameters(parameters, grads, learning_rate)
 
         if i % 50 == 0:
-            A2 = cache.get("A2")
-            cost = compute_cost(A2, Y)
+            A3 = cache.get("A3")
+            cost = compute_cost(A3, Y)
             print(f"Cost after iteration {i}: {cost:.6f}")
 
     return parameters
