@@ -16,15 +16,19 @@ def layer_sizes(X, Y, hidden_units_1=32, hidden_units_2=32):
     Y : `np.ndarray`
         Input data of shape `(n_y, m)`, where n_y is the number of output units and m is the number of examples.
 
-    hidden_units : `int, optional`
-        Number of neurons in the hidden layer. Default is 32.
+    hidden_units_1 : `int, optional`
+        Number of neurons in the 1st hidden layer. Default is 32.
+
+    hidden_units_2 : `int, optional`
+        Number of neurons in the 2nd hidden layer. Default is 32.
 
     Returns
     -------
     tuple
         A tuple (n_x, n_h, n_y) where:
         - n_x : `int`. Number of input features (size of input layer).
-        - n_h : `int`. Number of hidden units (size of hidden layer).
+        - n_h_1 : `int`. Number of hidden units in 1st layer.
+        - n_h_2 : `int`. Number of hidden units in 2nd layer.
         - n_y : `int`. Number of output units (size of output layer).
     """
 
@@ -44,8 +48,10 @@ def initialize_parameters(n_x, n_h_1, n_h_2, n_y):
     ----------
     n_x : `int`
         Number of input features (input layer size).
-    n_h : `int`
-        Number of neurons in the hidden layer.
+    n_h_1 : `int`
+        Number of neurons in the 1st hidden layer.
+    n_h_2 : `int`
+        Number of neurons in the 2nd hidden layer.
     n_y : `int`
         Number of output units (output layer size).
 
@@ -53,10 +59,12 @@ def initialize_parameters(n_x, n_h_1, n_h_2, n_y):
     --------
     parameters : `dict`
         A dictionary containing:
-        - W1 : Weight matrix of shape `(n_x, n_h)`
-        - b1 : Bias vector of shape `(n_h, 1)`
-        - W2 : Weight matrix of shape `(n_h, n_y)`
-        - b2 : Bias vector of shape `(n_y, 1)`
+        - W1 : Weight matrix of shape `(n_x, n_h_1)`
+        - b1 : Bias vector of shape `(n_h_1, 1)`
+        - W2 : Weight matrix of shape `(n_h_1, n_h_2)`
+        - b2 : Bias vector of shape `(n_h_2, 1)`
+        - W3 : Weight matrix of shape `(n_h_2, n_y)`
+        - b3 : Bias vector of shape `(n_y, 1)`
     """
 
     # If you need to generate the same sequence of random numbers multiple times within a program, you'll need to set the seed again before each generation.
@@ -82,13 +90,17 @@ def forward_propagation(X: np.ndarray, parameters: dict) -> dict:
     ----------
     parameters : `dict`
         Dictionary containing the parameters:
-        - W1 : `np.ndarray` of shape `(n_x, n_h)`.
+        - W1 : `np.ndarray` of shape `(n_x, n_h_1)`.
             Weight matrix for the first layer
-        - b1 : `np.ndarray` of shape `(n_h, 1)`.
+        - b1 : `np.ndarray` of shape `(n_h_1, 1)`.
             Bias vector for the first layer
-        - W2 : `np.ndarray` of shape `(n_h, n_y)`.
+        - W2 : `np.ndarray` of shape `(n_h_1, n_h_2)`.
             Weight matrix for the second layer
-        - b2 : `np.ndarray` of shape `(n_y, 1)`.
+        - b2 : `np.ndarray` of shape `(n_h_2, 1)`.
+            Bias vector for the second layer
+        - W3 : `np.ndarray` of shape `(n_h_2, n_y)`.
+            Weight matrix for the second layer
+        - b3 : `np.ndarray` of shape `(n_y, 1)`.
             Bias vector for the second layer
 
     X : `np.ndarray`
@@ -105,7 +117,11 @@ def forward_propagation(X: np.ndarray, parameters: dict) -> dict:
         - Z2 : `np.ndarray`.
             Linear activation of second layer
         - A2 : `np.ndarray`.
-            Activation from second layer (sigmoid)
+            Activation from second layer (tanh)
+        - Z3 : `np.ndarray`.
+            Linear activation of third layer
+        - A3 : `np.ndarray`.
+            Activation from third layer (sigmoid)
     """
 
     W1, b1 = parameters["W1"], parameters["b1"]
@@ -138,14 +154,18 @@ def backward_propagation(parameters: dict, cache: dict, X: np.ndarray, Y: np.nda
     ----------
     parameters : `dict`
         Dictionary containing the parameters:
-        - W1 : `np.ndarray` of shape `(n_x, n_h)`.
+        - W1 : `np.ndarray` of shape `(n_x, n_h_1)`
             Weight matrix for the first layer
-        - b1 : `np.ndarray` of shape `(n_h, 1)`.
+        - b1 : `np.ndarray` of shape `(n_h_1, 1)`
             Bias vector for the first layer
-        - W2 : `np.ndarray` of shape `(n_h, n_y)`.
+        - W2 : `np.ndarray` of shape `(n_h_1, n_h_2)`
             Weight matrix for the second layer
-        - b2 : `np.ndarray` of shape `(n_y, 1)`.
+        - b2 : `np.ndarray` of shape `(n_h_2, 1)`
             Bias vector for the second layer
+        - W3 : `np.ndarray` of shape `(n_h_2, n_y)`
+            Weight matrix for the third layer
+        - b3 : `np.ndarray` of shape `(n_y, 1)`
+            Bias vector for the third layer
 
     cache : `dict`
         Dictionary containing intermediate values:
@@ -156,7 +176,11 @@ def backward_propagation(parameters: dict, cache: dict, X: np.ndarray, Y: np.nda
         - Z2 : `np.ndarray`.
             Linear activation of second layer
         - A2 : `np.ndarray`.
-            Activation from second layer (sigmoid)
+            Activation from second layer (tanh)
+        - Z3 : `np.ndarray`.
+            Linear activation of third layer
+        - A3 : `np.ndarray`.
+            Activation from third layer (sigmoid)
 
     X : `np.ndarray`
         Input data of shape `(n_x, m)`, where n_x is the number of features and m is the number of examples.
@@ -166,16 +190,14 @@ def backward_propagation(parameters: dict, cache: dict, X: np.ndarray, Y: np.nda
 
     Returns
     -------
-    grads : `dict`
-        Dictionary containing intermediate values:
-        - dW1 : `np.ndarray`.
-            Gradient of the loss w.r.t W1
-        - db1 : `np.ndarray`.
-            Gradient of the loss w.r.t b1
-        - dW2 : `np.ndarray`.
-            Gradient of the loss w.r.t W2
-        - db2 : `np.ndarray`.
-            Gradient of the loss w.r.t b2
+    grads : dict
+        Dictionary containing gradients of the cost with respect to parameters:
+        - dW1 : `np.ndarray`
+        - db1 : `np.ndarray`
+        - dW2 : `np.ndarray`
+        - db2 : `np.ndarray`
+        - dW3 : `np.ndarray`
+        - db3 : `np.ndarray`
     """
 
     m = X.shape[1]
@@ -236,48 +258,42 @@ def compute_cost(A3: np.ndarray, Y: np.ndarray) -> float:
 
 def update_parameters(parameters: dict, grads: dict, learning_rate: float) -> dict:
     """
-    Updates the parameters of the 2-layer neural network.
+    Updates the parameters of a 3-layer neural network using gradient descent.
 
     Parameters
     ----------
     parameters : `dict`
-        Dictionary containing the parameters:
-        - W1 : `np.ndarray` of shape `(n_x, n_h)`.
-            Weight matrix for the first layer
-        - b1 : `np.ndarray` of shape `(n_h, 1)`.
-            Bias vector for the first layer
-        - W2 : `np.ndarray` of shape `(n_h, n_y)`.
-            Weight matrix for the second layer
-        - b2 : `np.ndarray` of shape `(n_y, 1)`.
-            Bias vector for the second layer
+        Dictionary containing current parameters:
+        - W1 : `np.ndarray` of shape `(n_x, n_h_1)`
+            Weights for the first layer
+        - b1 : `np.ndarray` of shape `(n_h_1, 1)`
+            Biases for the first layer
+        - W2 : `np.ndarray` of shape `(n_h_1, n_h_2)`
+            Weights for the second layer
+        - b2 : `np.ndarray` of shape `(n_h_2, 1)`
+            Biases for the second layer
+        - W3 : `np.ndarray` of shape `(n_h_2, n_y)`
+            Weights for the third layer
+        - b3 : `np.ndarray` of shape `(n_y, 1)`
+            Biases for the third layer
 
     grads : `dict`
-        Dictionary containing intermediate values:
-        - dW1 : `np.ndarray`.
-            Gradient of the loss w.r.t W1
-        - db1 : `np.ndarray`.
-            Gradient of the loss w.r.t b1
-        - dW2 : `np.ndarray`.
-            Gradient of the loss w.r.t W2
-        - db2 : `np.ndarray`.
-            Gradient of the loss w.r.t b2
+        Dictionary containing gradients of the cost with respect to parameters:
+        - dW1 : `np.ndarray`
+        - db1 : `np.ndarray`
+        - dW2 : `np.ndarray`
+        - db2 : `np.ndarray`
+        - dW3 : `np.ndarray`
+        - db3 : `np.ndarray`
 
     learning_rate : `float`
-        The learning rate for the update step.
-
+        The learning rate used to update the parameters.
 
     Returns
     -------
-    parameters :`dict`
-        Updated parameters after applying the gradients:
-        - W1 : `np.ndarray` of shape `(n_x, n_h)`.
-            Updated weight matrix for the first layer
-        - b1 : `np.ndarray` of shape `(n_h, 1)`.
-            Updated bias vector for the first layer
-        - W2 : `np.ndarray` of shape `(n_h, n_y)`.
-            Updated weight matrix for the second layer
-        - b2 : `np.ndarray` of shape `(n_y, 1)`.
-            Updated bias vector for the second layer
+    parameters : `dict`
+        Dictionary containing updated parameters:
+        - W1, b1, W2, b2, W3, b3 (same shapes as input parameters)
     """
 
     updated_params = {}
@@ -346,28 +362,32 @@ def build_model(
 
 def predict(parameters: dict, X: np.ndarray) -> np.ndarray:
     """
-    Predicts the labels for the input data using the trained parameters.
+    Predicts binary labels for the input data through a 3-layer neural network.
 
     Parameters
     ----------
-    parameters : `dict`
-        Dictionary containing the parameters:
-        - W1 : `np.ndarray` of shape `(n_x, n_h)`.
+    parameters : dict
+        Dictionary containing the trained parameters:
+        - W1 : `np.ndarray` of shape `(n_x, n_h_1)`
             Weight matrix for the first layer
-        - b1 : `np.ndarray` of shape `(n_h, 1)`.
+        - b1 : `np.ndarray` of shape `(n_h_1, 1)`
             Bias vector for the first layer
-        - W2 : `np.ndarray` of shape `(n_h, n_y)`.
+        - W2 : `np.ndarray` of shape `(n_h_1, n_h_2)`
             Weight matrix for the second layer
-        - b2 : `np.ndarray` of shape `(n_y, 1)`.
+        - b2 : `np.ndarray` of shape `(n_h_2, 1)`
             Bias vector for the second layer
+        - W3 : `np.ndarray` of shape `(n_h_2, n_y)`
+            Weight matrix for the third layer
+        - b3 : `np.ndarray` of shape `(n_y, 1)`
+            Bias vector for the third layer
 
-    X : `np.ndarray`
-        Input data of shape `(n_x, m)`, where n_x is the number of features and m is the number of examples.
+    X : np.ndarray
+        Input data of shape `(n_x, m)`, where n_x is the number of input features and m is the number of examples.
 
     Returns
     -------
-    A2 : `np.ndarray`
-        Predicted labels of shape `(1, m)`, where m is the number of examples with 0s and 1s.
+    A3 : np.ndarray
+        Binary predictions of shape `(1, m)`, where each value is 0 or 1.
     """
 
     cache = forward_propagation(X, parameters)
