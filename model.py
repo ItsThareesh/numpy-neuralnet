@@ -300,7 +300,8 @@ def update_parameters(parameters: dict, grads: dict, learning_rate: float) -> di
 def build_model(
     X: np.ndarray,
     Y: np.ndarray,
-    hidden_units: int = 16,
+    hidden_units_1: int = 16,
+    hidden_units_2: int = 16,
     learning_rate: float = 0.01,
     num_iterations: int = 5000
 ) -> dict:
@@ -330,8 +331,8 @@ def build_model(
         Updated parameters after applying the gradients. Received from the `update_parameters` function.
     """
 
-    n_x, n_h, n_y = layer_sizes(X, Y, hidden_units=hidden_units)
-    parameters = initialize_parameters(n_x, n_h, n_y)
+    n_x, n_h_1, n_h_2, n_y = layer_sizes(X, Y, hidden_units_1, hidden_units_2)
+    parameters = initialize_parameters(n_x, n_h_1, n_h_2, n_y)
 
     for i in range(0, num_iterations):
         cache = forward_propagation(X, parameters)
@@ -373,6 +374,6 @@ def predict(parameters: dict, X: np.ndarray) -> np.ndarray:
     """
 
     cache = forward_propagation(X, parameters)
-    A2 = (cache["A2"] > 0.5).astype(int)
+    A3 = (cache["A3"] > 0.5).astype(int)
 
-    return A2
+    return A3

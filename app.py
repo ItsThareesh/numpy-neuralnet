@@ -24,7 +24,8 @@ dataset_choice = st.sidebar.selectbox("Select a dataset",
 
 # 2. Model hyperparameters
 st.sidebar.header("Model Hyperparameters")
-hidden_units = st.sidebar.slider("Hidden Layer Units", 1, 128, 70)
+hidden_units_1 = st.sidebar.slider("1st Hidden Layer Units", 1, 128, 24)
+hidden_units_2 = st.sidebar.slider("2nd Hidden Layer Units", 1, 128, 12)
 learning_rate = st.sidebar.slider("Learning Rate", 0.01, 5.0, 1.2, step=0.01)
 iterations = st.sidebar.slider("Training Iterations", 500, 10000, 5000, step=500)
 
@@ -50,7 +51,7 @@ _, col2, _ = st.columns([1, 1, 1])
 with col2:
     if st.button("Train Model"):
         with st.spinner("Training in progress..."):
-            parameters = build_model(X, Y, hidden_units, learning_rate, iterations)
+            parameters = build_model(X, Y, hidden_units_1, hidden_units_2, learning_rate, iterations)
             st.session_state["Model_Trained"] = True
 
 
