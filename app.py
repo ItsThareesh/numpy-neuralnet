@@ -10,7 +10,7 @@ st.session_state["Model_Trained"] = False
 st.title("🧠 Explore Neural Networks in Action!")
 
 st.markdown("""
-Dive into how a simple 2-layer neural network learns to classify non-linearly separable 2D data.
+Dive into how a simple 3-layer neural network learns to classify non-linearly separable 2D data.
 
 - 🔍 Choose different datasets (moons, circles, blobs, and more)
 - 🎛️ Tune hyperparameters like hidden units and learning rate
@@ -28,6 +28,7 @@ hidden_units_1 = st.sidebar.slider("1st Hidden Layer Units", 1, 128, 24)
 hidden_units_2 = st.sidebar.slider("2nd Hidden Layer Units", 1, 128, 12)
 learning_rate = st.sidebar.slider("Learning Rate", 0.01, 5.0, 1.2, step=0.01)
 iterations = st.sidebar.slider("Training Iterations", 500, 10000, 5000, step=500)
+activation = st.sidebar.selectbox("Activation Function (hidden layers)", ["tanh", "relu", "sigmoid"])
 
 # Load data
 if dataset_choice == "planar_flower_data":
@@ -51,7 +52,7 @@ _, col2, _ = st.columns([1, 1, 1])
 with col2:
     if st.button("Train Model"):
         with st.spinner("Training in progress..."):
-            parameters = build_model(X, Y, hidden_units_1, hidden_units_2, learning_rate, iterations)
+            parameters = build_model(X, Y, hidden_units_1, hidden_units_2, learning_rate, iterations, activation)
             st.session_state["Model_Trained"] = True
 
 

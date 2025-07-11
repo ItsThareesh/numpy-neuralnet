@@ -1,12 +1,12 @@
 import numpy as np
-from planar_utils import sigmoid, tanh_derivative
+from planar_utils import sigmoid, tanh_derivative, relu, relu_derivative
 
 np.random.seed(1)
 
 
 def layer_sizes(X, Y, hidden_units_1=32, hidden_units_2=32):
     """
-    Computes the sizes of the layers in a 2-layer neural network.
+    Computes the sizes of the layers in a 3-layer neural network.
 
     Parameters
     ----------
@@ -42,7 +42,7 @@ def layer_sizes(X, Y, hidden_units_1=32, hidden_units_2=32):
 
 def initialize_parameters(n_x, n_h_1, n_h_2, n_y):
     """
-    Initializes the parameters of a 2-layer neural network.
+    Initializes the parameters of a 3-layer neural network.
 
     Parameters
     ----------
@@ -82,9 +82,9 @@ def initialize_parameters(n_x, n_h_1, n_h_2, n_y):
     return parameters
 
 
-def forward_propagation(X: np.ndarray, parameters: dict) -> dict:
+def forward_propagation(X: np.ndarray, parameters: dict, activation: str = "tanh") -> dict:
     """
-    Implements forward propagation for a 2-layer neural network.
+    Implements forward propagation for a 3-layer neural network.
 
     Parameters
     ----------
@@ -102,6 +102,8 @@ def forward_propagation(X: np.ndarray, parameters: dict) -> dict:
             Weight matrix for the second layer
         - b3 : `np.ndarray` of shape `(n_y, 1)`.
             Bias vector for the second layer
+        - activation : `str`
+            Activation function used in the hidden layers. Options are "tanh", "relu", or "sigmoid".
 
     X : `np.ndarray`
         Input data of shape `(n_x, m)`, where n_x is the number of features and m is the number of examples.
@@ -129,10 +131,20 @@ def forward_propagation(X: np.ndarray, parameters: dict) -> dict:
     W3, b3 = parameters["W3"], parameters["b3"]
 
     Z1 = np.dot(W1.T, X) + b1
-    A1 = np.tanh(Z1)
+    if activation == "relu":
+        A1 = relu(Z1)
+    elif activation == "sigmoid":
+        A1 = sigmoid(Z1)
+    else:
+        A1 = np.tanh(Z1)
 
     Z2 = np.dot(W2.T, A1) + b2
-    A2 = np.tanh(Z2)
+    if activation == "relu":
+        A2 = relu(Z2)
+    elif activation == "sigmoid":
+        A2 = sigmoid(Z2)
+    else:
+        A2 = np.tanh(Z2)
 
     Z3 = np.dot(W3.T, A2) + b3
     A3 = sigmoid(Z3)
@@ -146,9 +158,9 @@ def forward_propagation(X: np.ndarray, parameters: dict) -> dict:
     return cache
 
 
-def backward_propagation(parameters: dict, cache: dict, X: np.ndarray, Y: np.ndarray) -> dict:
+def backward_propagation(parameters: dict, cache: dict, X: np.ndarray, Y: np.ndarray, activation: str = "tanh") -> dict:
     """
-    Implements backward propagation for a 2-layer neural network.
+    Implements backward propagation for a 3-layer neural network.
 
     Parameters
     ----------
@@ -166,6 +178,8 @@ def backward_propagation(parameters: dict, cache: dict, X: np.ndarray, Y: np.nda
             Weight matrix for the third layer
         - b3 : `np.ndarray` of shape `(n_y, 1)`
             Bias vector for the third layer
+        - activation : `str`
+            Activation function used in the hidden layers. Options are "tanh", "relu", or "sigmoid".
 
     cache : `dict`
         Dictionary containing intermediate values:
@@ -213,11 +227,23 @@ def backward_propagation(parameters: dict, cache: dict, X: np.ndarray, Y: np.nda
     dW3 = np.dot(A2, dZ3.T) / m
     db3 = np.sum(dZ3, axis=1, keepdims=True) / m
 
-    dZ2 = np.dot(W3, dZ3) * tanh_derivative(A2)
+    if activation == "relu":
+        dZ2 = np.dot(W3, dZ3) * relu_derivative(A2)
+    elif activation == "sigmoid":
+        dZ2 = np.dot(W3, dZ3) * (A2 * (1 - A2))
+    else:
+        dZ2 = np.dot(W3, dZ3) * tanh_derivative(A2)
+
     dW2 = np.dot(A1, dZ2.T) / m
     db2 = np.sum(dZ2, axis=1, keepdims=True) / m
 
-    dZ1 = np.dot(W2, dZ2) * tanh_derivative(A1)
+    if activation == "relu":
+        dZ1 = np.dot(W2, dZ2) * relu_derivative(A1)
+    elif activation == "sigmoid":
+        dZ1 = np.dot(W2, dZ2) * (A1 * (1 - A1))
+    else:
+        dZ1 = np.dot(W2, dZ2) * tanh_derivative(A1)
+
     dW1 = np.dot(X, dZ1.T) / m
     db1 = np.sum(dZ1, axis=1, keepdims=True) / m
 
@@ -232,7 +258,7 @@ def backward_propagation(parameters: dict, cache: dict, X: np.ndarray, Y: np.nda
 
 def compute_cost(A3: np.ndarray, Y: np.ndarray) -> float:
     """
-    Computes the cost for the 2-layer neural network.
+    Computes the cost for the 3-layer neural network.
 
     Parameters
     ----------
@@ -316,10 +342,11 @@ def build_model(
     hidden_units_1: int = 16,
     hidden_units_2: int = 16,
     learning_rate: float = 0.01,
-    num_iterations: int = 5000
+    num_iterations: int = 5000,
+    activation: str = "tanh"
 ) -> dict:
     """
-    Builds and trains the model for a 2-layer neural network.
+    Builds and trains the model for a 3-layer neural network.
 
     Parameters
     ----------
@@ -338,6 +365,9 @@ def build_model(
     num_iterations : `int, optional`
         Number of iterations for training the model. Default is 5000.
 
+    activation : `str`
+        Activation function used in the hidden layers. Options are "tanh", "relu", or "sigmoid".
+
     Returns
     -------
     parameters : `dict`
@@ -348,8 +378,8 @@ def build_model(
     parameters = initialize_parameters(n_x, n_h_1, n_h_2, n_y)
 
     for i in range(0, num_iterations):
-        cache = forward_propagation(X, parameters)
-        grads = backward_propagation(parameters, cache, X, Y)
+        cache = forward_propagation(X, parameters, activation)
+        grads = backward_propagation(parameters, cache, X, Y, activation)
         parameters = update_parameters(parameters, grads, learning_rate)
 
         if i % 50 == 0:

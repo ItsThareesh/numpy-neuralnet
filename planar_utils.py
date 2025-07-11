@@ -70,8 +70,37 @@ def sigmoid(x):
     -------
     output : sigmoid(x)
     """
-    s = 1/(1+np.exp(-x))
-    return s
+    return 1 / (1 + np.exp(-x))
+
+
+def relu(x):
+    """
+    Compute the ReLU (Rectified Linear Unit) of x.
+
+    Parameters
+    ----------
+    x : A scalar or numpy array of any size.
+
+    Returns
+    -------
+    output : relu(x)
+    """
+    return np.maximum(0, x)
+
+
+def relu_derivative(A):
+    """
+    Compute the derivative of the ReLU activation.
+
+    Parameters
+    ----------
+    A : A scalar or numpy array of any size (output of relu).
+
+    Returns
+    -------
+    output : relu'(A)
+    """
+    return (A > 0).astype(float)
 
 
 def load_planar_dataset():
